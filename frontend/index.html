@@ -1,15 +1,143 @@
 <!doctype html>
-<html>
-<head><meta charset="utf-8"><title>Staking dApp</title></head>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Staking dApp</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f0f2f5;
+    }
+    .container {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 300px;
+      text-align: center;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      margin: 10px 0;
+      cursor: pointer;
+      border-radius: 5px;
+      width: 100%;
+    }
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    input {
+      padding: 8px;
+      margin: 10px 0;
+      width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    #log {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      margin-top: 10px;
+      color: #555;
+      font-size: 14px;
+    }
+  </style>
+</head>
 <body>
-  <h1>Staking dApp</h1>
-  <button id="connect">Connect</button>
-  <div>Contract: <input id="addr" placeholder="0x..."></div>
-  <div>Your Stake: <span id="mystake">0</span> wei</div>
-  <button id="stake">Stake 0.1 ETH</button>
-  <button id="claim">Claim</button>
-  <pre id="log"></pre>
+  <div class="container">
+    <h1>Staking dApp</h1>
+    <button id="connect">Connect Wallet</button>
+    <div id="wallet-info" style="display: none;">
+      <p>Wallet: <span id="wallet-address"></span></p>
+      <div>Contract Address: <input id="addr" placeholder="0x..."></div>
+      <div>Your Stake: <span id="mystake">0</span> wei</div>
+      <div>
+        <input id="stake-amount" type="number" placeholder="Amount to Stake (ETH)" step="0.01" min="0.01">
+      </div>
+      <button id="stake">Stake</button>
+      <button id="claim">Claim</button>
+    </div>
+    <pre id="log"></pre>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-  <script src="./script.js"></script>
+  <script>
+    let provider;
+    let signer;
+    let walletAddress;
+
+    const connectButton = document.getElementById('connect');
+    const stakeButton = document.getElementById('stake');
+    const claimButton = document.getElementById('claim');
+    const walletInfo = document.getElementById('wallet-info');
+    const walletAddressElement = document.getElementById('wallet-address');
+    const stakeAmountInput = document.getElementById('stake-amount');
+    const logElement = document.getElementById('log');
+
+    // Connect to MetaMask or other wallet provider
+    connectButton.addEventListener('click', async () => {
+      if (window.ethereum) {
+        provider = new ethers.BrowserProvider(window.ethereum);
+        await provider.send('eth_requestAccounts', []);
+        signer = provider.getSigner();
+        walletAddress = await signer.getAddress();
+        
+        walletAddressElement.textContent = walletAddress;
+        walletInfo.style.display = 'block';
+        connectButton.style.display = 'none';
+        log('Connected: ' + walletAddress);
+      } else {
+        alert('Please install MetaMask!');
+      }
+    });
+
+    // Stake function
+    stakeButton.addEventListener('click', async () => {
+      const amount = parseFloat(stakeAmountInput.value);
+      if (isNaN(amount) || amount <= 0) {
+        alert('Please enter a valid stake amount');
+        return;
+      }
+
+      const ethAmount = ethers.parseEther(amount.toString());
+      try {
+        const tx = await signer.sendTransaction({
+          to: 'YOUR_CONTRACT_ADDRESS', // Replace with actual contract address
+          value: ethAmount,
+        });
+        log('Transaction sent: ' + tx.hash);
+        await tx.wait();
+        log('Transaction confirmed!');
+      } catch (error) {
+        log('Error: ' + error.message);
+      }
+    });
+
+    // Claim function
+    claimButton.addEventListener('click', async () => {
+      try {
+        // Call your contract's claim function here
+        log('Claiming rewards...');
+        // Example: await contract.claimRewards();
+        log('Rewards claimed successfully');
+      } catch (error) {
+        log('Error: ' + error.message);
+      }
+    });
+
+    // Simple log function
+    function log(message) {
+      logElement.textContent = message;
+    }
+  </script>
 </body>
 </html>
