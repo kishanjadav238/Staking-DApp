@@ -32,7 +32,7 @@ contract Staking {
         stakes[msg.sender] = 0;
         totalStaked -= amount;
 
-        // Interactions
+        // Interactions with user
         payable(msg.sender).transfer(amount + reward);
     }
 }
