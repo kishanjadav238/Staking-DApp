@@ -100,7 +100,6 @@
   </div>
 
 
-  //use of ethers
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <script>
     let provider;
@@ -132,7 +131,7 @@
       }
     });
 
-    // Stake function
+    // Stake function event
     stakeButton.addEventListener('click', async () => {
       const amount = parseFloat(stakeAmountInput.value);
       if (isNaN(amount) || amount <= 0) {
